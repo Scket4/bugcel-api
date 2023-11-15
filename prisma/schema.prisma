@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int         @id @default(autoincrement())
+  name       String      @default("Anonymous")
+  password   String
+  createdAt  DateTime    @default(now()) @db.Date
+  userBoards UserBoard[]
+}
+
+model Board {
+  id         Int         @id @default(autoincrement())
+  title      String      @default("Untitled")
+  createdAt  DateTime    @default(now()) @db.Date
+  records    Record[]
+  userBoards UserBoard[]
+}
+
+model UserBoard {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @db.Date
+  userId    Int
+  boardId   Int
+  board     Board    @relation(fields: [boardId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Record {
+  id          Int        @id @default(autoincrement())
+  type        RecordType @default(EXPENSE)
+  amount      Int        @default(0)
+  date        DateTime   @default(now()) @db.Date
+  description String     @default("")
+  userBoardId Int
+  board       Board      @relation(fields: [userBoardId], references: [id])
+}
+
+enum RecordType {
+  INCOME
+  EXPENSE
+}
